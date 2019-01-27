@@ -1,5 +1,4 @@
 'use strict';
-
 const transpileModule = require('./transpile');
 const ts = require('typescript');
 const anymatch = require('anymatch');
@@ -20,13 +19,11 @@ const resolveEnum = (choice, opts) => {
   return defaultValue;
 };
 
-const getTsconfig = configRoot => {
-  if (!configRoot) return {};
-
-  const file = path.resolve(configRoot, 'tsconfig.json');
+const getTSconfig = config => {
+  const TSconfig = path.resolve(config.paths.root, 'tsconfig.json');
 
   try {
-    return require(file).compilerOptions;
+    return require(TSconfig).compilerOptions;
   } catch (e) {
     return {};
   }
@@ -42,7 +39,7 @@ const findLessOrEqual = (haystack, needle) => {
 
 const errPos = err => {
   if (err.file) {
-    const lineMap = err.file.lineMap;
+    const {lineMap} = err.file;
     if (lineMap) {
       const lineIndex = findLessOrEqual(lineMap, err.start);
 
@@ -56,24 +53,18 @@ const toMeaningfulMessage = err => `Error ${err.code}: ${err.messageText} (${err
 
 class TypeScriptCompiler {
   constructor(config) {
-    if (!config) {
-      config = {};
-    }
+    const options = config.plugins.typescript ||
+      config.plugins.brunchTypescript ||
+      {};
 
-    const options = config.plugins && config.plugins.brunchTypescript || {};
-    this.options = getTsconfig(config.paths && config.paths.root);
+    this.options = getTSconfig(config);
 
     Object.keys(options).forEach(key => {
       if (key === 'sourceMap' || key === 'ignore') return;
       this.options[key] = options[key];
     });
 
-    if (this.options.jsx === 'preserve') {
-      this.targetExtension = '.jsx';
-    } else {
-      this.targetExtension = '.js';
-    }
-
+    this.targetExtension = this.options.jsx === 'preserve' ? 'jsx' : 'js';
     this.options.module = resolveEnum(this.options.module, ts.ModuleKind);
     this.options.target = resolveEnum(this.options.target, ts.ScriptTarget);
     this.options.jsx = resolveEnum(this.options.jsx, ts.JsxEmit);
@@ -100,46 +91,36 @@ class TypeScriptCompiler {
     }
   }
 
-  compile(params) {
-    if (this.isIgnored(params.path)) return Promise.resolve(params);
+  compile(file) {
+    if (this.isIgnored(file.path)) return file;
 
-    const tsOptions = {
-      fileName: params.path,
+    const compiled = transpileModule(file.data, {
+      fileName: file.path,
       reportDiagnostics: true,
       compilerOptions: this.options,
-    };
-
-    return new Promise((resolve, reject) => {
-      let compiled;
-
-      try {
-        compiled = transpileModule(params.data, tsOptions);
-        let reportable = compiled.diagnostics;
-
-        if (this.ignoreAllErrors === true) {
-          reportable = [];
-        } else if (this.ignoreErrors) {
-          reportable = reportable.filter(err => !this.ignoreErrors.has(err.code));
-        }
-
-        if (reportable.length) {
-          reject(reportable.map(toMeaningfulMessage).join('\n'));
-        }
-      } catch (err) {
-        return reject(err);
-      }
-
-      const result = {data: `${compiled.outputText || compiled}\n`};
-
-      if (compiled.sourceMapText) {
-        // Fix the sources path so Brunch can merge them.
-        const rawMap = JSON.parse(compiled.sourceMapText);
-        rawMap.sources[0] = params.path;
-        result.map = JSON.stringify(rawMap);
-      }
-
-      resolve(result);
     });
+
+    let diag = compiled.diagnostics;
+    if (this.ignoreAllErrors) {
+      diag = [];
+    } else if (this.ignoreErrors) {
+      diag = diag.filter(err => !this.ignoreErrors.has(err.code));
+    }
+
+    if (diag.length) {
+      throw diag.map(toMeaningfulMessage).join('\n');
+    }
+
+    const result = {data: `${compiled.outputText || compiled}\n`};
+
+    if (compiled.sourceMapText) {
+      // Fix the sources path so Brunch can merge them.
+      const rawMap = JSON.parse(compiled.sourceMapText);
+      rawMap.sources[0] = file.path;
+      result.map = JSON.stringify(rawMap);
+    }
+
+    return result;
   }
 }
 

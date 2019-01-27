@@ -1,5 +1,4 @@
 'use strict';
-
 const ts = require('typescript');
 
 const ignoredErrors = new Set([
@@ -44,7 +43,6 @@ const transpileModule = (input, transpileOptions) => {
 
   const newLine = ts.getNewLineCharacter(options);
 
-  // Output
   let outputText;
   let sourceMapText;
 
@@ -85,7 +83,7 @@ const transpileModule = (input, transpileOptions) => {
     readFile(/* fileName */) {
       return '';
     },
-    directoryExists(/* directoryExists */) {
+    directoryExists() {
       return true;
     },
   };
@@ -100,7 +98,6 @@ const transpileModule = (input, transpileOptions) => {
     ts.addRange(/* to */ diagnostics, /* from */ program.getOptionsDiagnostics());
   }
 
-  // Emit
   program.emit();
   ts.Debug.assert(outputText !== undefined, 'Output generation failed');
 

@@ -22,7 +22,7 @@ Any options in your `brunch-config.js` or `brunch-config.coffee` will override t
 module.exports = {
   // ...
   plugins: {
-    brunchTypescript: {
+    typescript: {
       removeComments: true
     }
   }
@@ -36,7 +36,7 @@ If no options are provided, this plugin will default to the following:
   target: "es5",
   module: "commonjs",
   emitDecoratorMetadata: true,
-  experimentalDecorators: true
+  experimentalDecorators: true,
 }
 ```
 
