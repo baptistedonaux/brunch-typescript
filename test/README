@@ -1,0 +1,82 @@
+This is a test application used to manually verify the typescript-brunch
+plugin using a real brunch build environment.  It builds some sample
+TypeScript files found in the app/ directory using whatever version of
+typescript has been installed.
+
+The package.json in this directory specifies the version of typescript-brunch
+found in the parent directory via the file-based dependency mechanism.  This
+sets up a symlink from this app's node_modules/ to the parent directory, so
+you can make changes to typescript-brunch, and the next build here will use
+them.
+
+Helpful commands:
+
+npm install
+
+  Fetch all of this app's dependent modules and put them into
+  node_modules/.
+
+npm install typescript@x.y.z
+
+  Install whatever version of typescript you want to test with.
+
+./tsc -v
+
+  Confirm that you're using the version of TypeScript that you think you are.
+  With the symlinks and whatnot, you can end up with typescript in some of the
+  submodules as well if you're not careful.
+
+export NODE_PATH=node_modules/
+
+  Adds this test app's node_modules/ to node's resolver.  This is necessary
+  because Node will resolve the symlink to typescript-brunch to an absolute
+  path, and then only search that path for typescript.  However, typescript
+  isn't installed by typescript-brunch - it's only a peer dependency.  In
+  order for Node to find the typescript installed into this app's
+  node_modules/, we must explicitly add that path to Node's module search
+  path.
+  
+./brunch build -d -p
+
+  Build the test app.  This tests typesript-brunch.  The build result goes
+  into the public/app.js.
+
+./tsc -p app/app-tsconfig.json
+
+  Compile the app's TypeScript files directly with the tsc compiler to see if
+  tsc finds any errors that typescript-brunch doesn't.
+  
+  Note that the tsc config is called app-tsconfig.json instead of
+  tsconfig.json to avoid it being picked up by typescript-brunch.  It also
+  tells tsc to only compile; no JavaScript files are emitted, which would
+  clutter up the app/ dir and cause brunch to build them.
+
+The typescript-brunch package.json specifies typescript as a peer dependency,
+so you should never see a typescript directory inside typescript-brunch's
+node_modules/.  If you do, you've done something wrong and should nuke this
+app's entire node_modules/, and typescript-brunch's node_modules/ and npm
+install them again.
+
+The test app has been tested with the following typescript versions:
+
+  2.0.10
+  2.1.6
+  2.2.2
+  2.3.4
+  2.4.2
+  2.5.3
+  2.6.2
+  2.7.2
+  2.8.4
+  2.9.2
+  3.0.3
+  3.1.6
+
+It has also been tested with these node versions:
+
+  11.0.0
+  10.13.0
+  8.12.0
+
+-Paul Medynski
+-Nov 11, 2018

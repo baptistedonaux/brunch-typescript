@@ -4,7 +4,12 @@
   "description": "Adds TypeScript support to Brunch.",
   "author": "Baptiste Donaux <baptiste.donaux@gmail.com>",
   "contributors": [
-    "Colin Bate <colin@colinbate.com>"
+    "Colin Bate <colin@colinbate.com>",
+    {
+      "name": "Paul Medynski",
+      "email": "npm@healthybytes.ca",
+      "url": "https://github.com/paulmedynski"
+    }
   ],
   "homepage": "https://github.com/brunch/typescript-brunch",
   "repository": {

@@ -1,0 +1,5 @@
+# Ignore node_modules/ in our test/ dir, which ESLint doesn't do by default.
+test/node_modules/*
+
+# Ignore the package built by our test app.
+test/public/*

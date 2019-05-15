@@ -1,0 +1,13 @@
+{
+  "compilerOptions":
+  {
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2015",
+    "pretty": true,
+    "sourceMap": true,
+    "traceResolution": false
+  },
+
+  "include": ["./**/*.ts"]
+}

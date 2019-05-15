@@ -1,0 +1,25 @@
+{
+  "name": "typescript-brunch-test-app",
+  "description": "Test app for typescript-brunch",
+  "private": true,
+  "author": "typescript-brunch",
+  "version": "0.0.1",
+  "repository": "",
+  "dependencies": {
+    "@types/jasmine": "^2.8.9",
+    "typescript": "^3.2.2"
+  },
+  "peerDependencies": {
+    "typescript": "^3"
+  },
+  "devDependencies": {
+    "auto-reload-brunch": "^2",
+    "brunch": "^2.10.17",
+    "clean-css-brunch": "^2",
+    "debug": "^4.1.0",
+    "tslint": "^5.11.0",
+    "tslint-brunch": "^0.9.2",
+    "typescript-brunch": "file:../",
+    "uglify-js-brunch": "^2"
+  }
+}

@@ -32,27 +32,18 @@ const getTsconfig = configRoot => {
   }
 };
 
-const findLessOrEqual = (haystack, needle) => {
-  let i = 0;
-  while (i + 1 < haystack.length && needle >= haystack[i + 1]) {
-    i += 1;
-  }
-  return i === haystack.length ? -1 : i;
-};
-
 const errPos = err => {
   if (err.file) {
-    const lineMap = err.file.lineMap;
-    if (lineMap) {
-      const lineIndex = findLessOrEqual(lineMap, err.start);
-
-      return `Line: ${lineIndex + 1}, Col: ${err.start - err.file.lineMap[lineIndex] + 1}`;
-    }
+    const point = err.file.getLineAndCharacterOfPosition(err.start);
+    return `Line: ${point.line + 1}, Col: ${point.character + 1}`;
   }
   return 'No line map';
 };
 
-const toMeaningfulMessage = err => `Error ${err.code}: ${err.messageText} (${errPos(err)})`;
+const toMeaningfulMessage = err => {
+  const msg = ts.flattenDiagnosticMessageText(err.messageText, '');
+  return `Error ${err.code}: ${msg} (${errPos(err)})`;
+};
 
 class TypeScriptCompiler {
   constructor(config) {
