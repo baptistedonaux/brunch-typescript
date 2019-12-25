@@ -4,6 +4,7 @@ const transpileModule = require('./transpile');
 const ts = require('typescript');
 const anymatch = require('anymatch');
 const path = require('path');
+const fs = require('fs');
 
 const resolveEnum = (choice, opts) => {
   const defaultValue = 1; // CommonJS/ES5/Preserve JSX defaults
@@ -20,16 +21,27 @@ const resolveEnum = (choice, opts) => {
   return defaultValue;
 };
 
+// Throws an error if the config cannot be read or parsed.
 const getTsconfig = configRoot => {
   if (!configRoot) return {};
 
   const file = path.resolve(configRoot, 'tsconfig.json');
 
-  try {
-    return require(file).compilerOptions;
-  } catch (e) {
+  // Read the contents of the JSON file.
+  let json = fs.readFileSync(file, {encoding: 'utf8'});
+
+  // Strip // and /**/ comments from the JSON, preserving those found within
+  // JSON strings.
+  json = json.replace(/\/\/.*|\/\*[\s\S]*?\*\/|("(\\.|[^"])*")/g, '$1');
+
+  // Parse the JSON into an object.
+  const options = JSON.parse(json);
+
+  // Use default compiler options if none present.
+  if (options.compilerOptions === undefined) {
     return {};
   }
+  return options.compilerOptions;
 };
 
 const findLessOrEqual = (haystack, needle) => {

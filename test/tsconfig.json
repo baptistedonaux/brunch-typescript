@@ -1,0 +1,17 @@
+// This is a sample tsconfig.json.  All comments should be stripped before it
+// is parsed as JSON.
+{
+  /* Should be stripped */
+  "compilerOptions":
+  {
+    // Should be stripped.
+    "foo": "Should // not be stripped",
+    "bar": "Should /* not be */ stripped",
+    "baz": true,
+    "fud": [1,2,3]
+  },
+  // Ignored fields.
+  "ignored": 98,
+  "ignoredToo": ["a","b","c"]
+}
+// Also stripped /* no really */
